@@ -11,12 +11,12 @@ impl ClasseDirParseObj for MultipleClassdir {
         //linux mac 平台下 以 : 分割 多个目录
         if path.contains(SUFFIX[0]) {
             for singlepath in path.split(SUFFIX[0]){
-                paths.push(classdir::new(singlepath))
+                paths.push(classdir::new_class_dir(singlepath))
             }
 
         }else if path.contains(SUFFIX[1]){ //windows 平台下 以 /分割 多个目录
             for singlepath in path.split(SUFFIX[1]){
-                paths.push(classdir::new(singlepath))
+                paths.push(classdir::new_class_dir(singlepath))
             }
 
         }
