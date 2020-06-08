@@ -1,17 +1,17 @@
-use crate::classpath::classdir::classeDirParseObj;
+use crate::classpath::classdir::ClasseDirParseObj;
 use std::fs;
 use std::path::Path;
 use std::io::{BufReader, Read};
 
-const class_suffix: &'static str = ".class";
-const class_capsuffix: &'static str = ".CLASS";
-pub struct zip_classdir{
+const CLASS_SUFFIX: &'static str = ".class";
+const CLASS_CAPSUFFIX: &'static str = ".CLASS";
+pub struct ZipClassdir {
     path:String,
 }
-impl classeDirParseObj for  zip_classdir{
+impl ClasseDirParseObj for ZipClassdir {
     //生成 一个类目录对象 包含一个目录
     fn new(mypath:&str) -> Self {
-        zip_classdir {
+        ZipClassdir {
             path: mypath.parse().unwrap(),
         }
     }
@@ -42,10 +42,11 @@ impl classeDirParseObj for  zip_classdir{
 
             // println!("{}",formatclassname);
 
-            if outpath.as_path().display().to_string().replace(class_suffix,"").replace(class_capsuffix,"") == formatclassname {
+            if outpath.as_path().display().to_string().replace(CLASS_SUFFIX, "").replace(CLASS_CAPSUFFIX, "") == formatclassname {
                 let mut arr:Vec<u8>  = Vec::with_capacity(file.size() as usize);
-                file.read_to_end(arr.as_mut());
-                println!("Entry {} is a file with name \"{}\" ({} bytes)", i, outpath.as_path().display(), file.size());
+
+                let size = file.read_to_end(arr.as_mut()).unwrap();
+                println!("Entry {} is a file with name \"{}\" ({} bytes)", i, outpath.as_path().display(), size);
                 return arr;
             }
 

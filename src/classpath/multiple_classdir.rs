@@ -1,31 +1,31 @@
-use crate::classpath::classdir::classeDirParseObj;
+use crate::classpath::classdir::ClasseDirParseObj;
 use crate::classpath::classdir;
 
-pub struct multiple_classdir{
-    allpath:Vec<Box<dyn classeDirParseObj>>,
+pub struct MultipleClassdir {
+    allpath:Vec<Box<dyn ClasseDirParseObj>>,
 }
-const  suffix:[char;2]  = [':',','];
-impl classeDirParseObj for multiple_classdir{
+const SUFFIX:[char;2]  = [':',','];
+impl ClasseDirParseObj for MultipleClassdir {
     fn new(path: &str) -> Self where Self: Sized {
-        let mut paths:Vec<Box<dyn classeDirParseObj>> = Vec::new();
+        let mut paths:Vec<Box<dyn ClasseDirParseObj>> = Vec::new();
         //linux mac 平台下 以 : 分割 多个目录
-        if path.contains(suffix[0]) {
-            for singlepath in path.split(suffix[0]){
+        if path.contains(SUFFIX[0]) {
+            for singlepath in path.split(SUFFIX[0]){
                 paths.push(classdir::new(singlepath))
             }
 
-        }else if path.contains(suffix[1]){ //windows 平台下 以 /分割 多个目录
-            for singlepath in path.split(suffix[1]){
+        }else if path.contains(SUFFIX[1]){ //windows 平台下 以 /分割 多个目录
+            for singlepath in path.split(SUFFIX[1]){
                 paths.push(classdir::new(singlepath))
             }
 
         }
-       return  multiple_classdir{allpath:paths}
+       return  MultipleClassdir {allpath:paths}
     }
 
-    fn read_class(&self, className: &str) -> Vec<u8> {
+    fn read_class(&self, class_name: &str) -> Vec<u8> {
         for multipypath in &self.allpath {
-            let tmp = multipypath.read_class(className);
+            let tmp = multipypath.read_class(class_name);
             if tmp.len()>1 {
                 return tmp
             }

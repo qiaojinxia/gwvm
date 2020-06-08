@@ -1,34 +1,34 @@
-use crate::classpath::classdir::classeDirParseObj;
+use crate::classpath::classdir::ClasseDirParseObj;
 use walkdir::WalkDir;
-use crate::classpath::zip_classdir::zip_classdir;
+use crate::classpath::zip_classdir::ZipClassdir;
 
 
-pub struct wildcard_classdir {
-    allpath:Vec<zip_classdir>,
+pub struct WildcardClassdir {
+    allpath:Vec<ZipClassdir>,
 }
-const  suffix:[&str;4]  = [".jar",".JAR",".ZIP",".zip"];
-impl classeDirParseObj for wildcard_classdir {
+const SUFFIX:[&str;4]  = [".jar",".JAR",".ZIP",".zip"];
+impl ClasseDirParseObj for WildcardClassdir {
     fn new(path: &str) -> Self where Self: Sized {
-        let mut allpath:Vec<zip_classdir> = Vec::new();
+        let mut allpath:Vec<ZipClassdir> = Vec::new();
         //遍历 当前目录下的目录
         for entry in WalkDir::new(path) {
             let entry = entry.unwrap();
-            for &su in  suffix.iter(){
+            for &su in  SUFFIX.iter(){
                 //跳过目录
                 if entry.path().display().to_string().ends_with(su) {
-                    let tmp =zip_classdir::new(entry.path().display().to_string().as_str());
+                    let tmp = ZipClassdir::new(entry.path().display().to_string().as_str());
                     allpath.push(tmp);
                 }
             }
 
 
         }
-        return wildcard_classdir{allpath:allpath}
+        return WildcardClassdir {allpath:allpath}
     }
 
-    fn read_class(&self, className: &str) -> Vec<u8> {
+    fn read_class(&self, class_name: &str) -> Vec<u8> {
         for zippath in &self.allpath {
-            let tmp = zippath.read_class(className);
+            let tmp = zippath.read_class(class_name);
             if tmp.len()>1 {
                 return tmp
             }

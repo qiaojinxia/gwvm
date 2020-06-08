@@ -1,16 +1,16 @@
-use crate::classpath::classdir::classeDirParseObj;
+use crate::classpath::classdir::ClasseDirParseObj;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 
-pub struct common_classdir {
+pub struct CommonClassdir {
     path:String,
 }
 
-impl classeDirParseObj for common_classdir {
+impl ClasseDirParseObj for CommonClassdir {
     //生成 一个类目录对象 包含一个目录
     fn new(mypath:&str) -> Self{
-        common_classdir {
+        CommonClassdir {
             path: mypath.parse().unwrap(),
         }
     }
@@ -26,12 +26,8 @@ impl classeDirParseObj for common_classdir {
         let f = File::open(my_path).expect( "File open error!");
         //定义一个 缓冲器 从文件流中读取
         let mut reader = BufReader::new(f);
-        //buffer的容量
-        let capacity  = reader.capacity();
-        //初始化 一个数组容量为 buffer获取到的
-        let mut buffer:Vec::<u8> = Vec::<u8>::with_capacity(capacity);
         //将 buffer 中内容 [u8] Clone 并返回 可变数组
-        buffer = reader.fill_buf().unwrap().to_vec();
+        let  buffer:Vec::<u8> = reader.fill_buf().unwrap().to_vec();
         //返回读取到的文件
         return buffer;
     }
