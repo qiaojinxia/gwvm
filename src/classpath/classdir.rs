@@ -12,18 +12,20 @@ use crate::classpath::common_classdir::CommonClassdir;
 use crate::classpath::zip_classdir::ZipClassdir;
 use crate::classpath::wildcard_classdir::WildcardClassdir;
 use crate::classpath::multiple_classdir::MultipleClassdir;
-
+use crate::classpath::class_reader::ClassFileReader;
 
 
 const WILDCARD_SYMBOL: &'static str = "*";
 const SPLITS_SYMBOL:[char;2]  = [':',','];
 
 
+
+
 //4种 path读取方式 都会实现这个trait
 pub trait ClasseDirParseObj {
      fn new(path:&str) -> Self where Self: Sized;
      //给定 类名 从目录对象读取类字节集 并返回
-     fn read_class(&self, class_name:&str) -> Vec<u8>;
+     fn read_class(&self, class_name:&str) -> Option<ClassFileReader>;
      //目录对象 所包含的所有路径
      fn get_path(&self) -> String;
 

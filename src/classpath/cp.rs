@@ -1,6 +1,7 @@
 use crate::classpath::classdir::{ClasseDirParseObj, new_class_dir};
 use std::env;
 use std::path::{Path, PathBuf};
+use crate::classpath::class_reader::ClassFileReader;
 
 pub struct ClassPath{
     //启动类目录
@@ -35,6 +36,7 @@ fn get_env_path() -> PathBuf {
 
             let jrepath: PathBuf;
             if xjre == "" {
+
                 //先从系统环境找 找不到从 当前目录找
                 jrepath = get_env_path();
             } else {
@@ -44,6 +46,7 @@ fn get_env_path() -> PathBuf {
             let jrepathf = jrepath.join("lib").join("*");
             let jextpathf = jrepath.join("lib").join("ext").join("*");
 
+            //初始化 boot_classpath  ext_classpath user_classpath
             let myclasspath = ClassPath {
                 boot_classpath: new_class_dir(jrepathf.to_str().unwrap().as_ref()),
                 ext_classpath: new_class_dir(jextpathf.to_str().unwrap().as_ref()),
@@ -53,22 +56,23 @@ fn get_env_path() -> PathBuf {
             myclasspath
         }
 
-        pub fn read_class(&self, classname:&str) -> Vec<u8>{
+        pub fn read_class(&self, classname:&str) -> Option<ClassFileReader>{
             let mut res = self.boot_classpath.read_class(classname);
-            if res.len()  > 0  {
-                println!("Find class from bootstarp Classpath");
-                return res;
-            }
+            match res {
+                Some(val) =>  {return Some(val)},
+                None =>  {}
+            };
             res = self.ext_classpath.read_class(classname);
-            if res.len()  > 0  {
-                println!("Find class from bootstarp ext Classpath");
-                return res;
-            }
+            match res {
+                Some(val) =>  {return Some(val)},
+                None =>  {}
+            };
+
             res = self.user_classpath.read_class(classname);
-            if res.len()  > 0  {
-                println!("Find class from userClasspath");
-                return res;
-            }
+            match res {
+                Some(val) =>  {return Some(val)},
+                None =>  {}
+            };
             panic!("can not load class {}",classname) ;
 
         }

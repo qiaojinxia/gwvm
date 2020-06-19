@@ -1,6 +1,7 @@
 use crate::classpath::classdir::ClasseDirParseObj;
 use walkdir::WalkDir;
 use crate::classpath::zip_classdir::ZipClassdir;
+use crate::classpath::class_reader::ClassFileReader;
 
 
 pub struct WildcardClassdir {
@@ -26,14 +27,16 @@ impl ClasseDirParseObj for WildcardClassdir {
         return WildcardClassdir {allpath:allpath}
     }
 
-    fn read_class(&self, class_name: &str) -> Vec<u8> {
+    fn read_class(&self, class_name: &str) -> Option<ClassFileReader> {
         for zippath in &self.allpath {
             let tmp = zippath.read_class(class_name);
-            if tmp.len()>1 {
-                return tmp
+            match tmp {
+                Some(val) =>{return  Some(val)},
+                None => {},
             }
+
         }
-      return Vec::new();
+      return None;
     }
 
     //这里把 多个目录 拼接起来

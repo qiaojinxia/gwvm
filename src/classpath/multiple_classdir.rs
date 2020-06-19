@@ -1,5 +1,6 @@
 use crate::classpath::classdir::ClasseDirParseObj;
 use crate::classpath::classdir;
+use crate::classpath::class_reader::ClassFileReader;
 
 pub struct MultipleClassdir {
     allpath:Vec<Box<dyn ClasseDirParseObj>>,
@@ -23,14 +24,16 @@ impl ClasseDirParseObj for MultipleClassdir {
        return  MultipleClassdir {allpath:paths}
     }
 
-    fn read_class(&self, class_name: &str) -> Vec<u8> {
+    fn read_class(&self, class_name: &str) -> Option<ClassFileReader> {
         for multipypath in &self.allpath {
             let tmp = multipypath.read_class(class_name);
-            if tmp.len()>1 {
-                return tmp
-            }
+            let res = match tmp {
+                Some(val) => Some(val),
+                None => None
+            };
+            return res;
         }
-        return Vec::new();
+        return None;
     }
 
     //这里把 多个目录 拼接起来

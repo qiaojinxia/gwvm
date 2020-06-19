@@ -6,6 +6,7 @@ mod classpath;
 
 
 extern crate clap;
+extern crate hex;
 use clap::{Arg, App};
 use std::env;
 use crate::classpath::cp::ClassPath;
@@ -74,8 +75,15 @@ fn main() {
     //"java.lang.Object"
     //替换通配符 ./为当前路径
     let rf = ClassPath::new_class_path(xjre, classpath);
-    let bytecode = rf.read_class(classname.as_ref());
-    println!("{:?}",bytecode);
+    //java 类包 java.lang.Object 这种形式的 而目录是 "java/lang/Object" 所以需要替换下
+    let formatclassname = classname.replace(".","/");
+
+    let mut bytecode = rf.read_class(formatclassname.as_ref()).unwrap();
+
+     bytecode.parse_constant_pool().print_constant();
+
+
+    // println!("{:?}",bytecode.unwrap().classreader);
     // let rf = classdir::newClassDir(classpath);
     // //如果是 . 就获取当前目录
     // let code = rf.read_class(classname);

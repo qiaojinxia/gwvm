@@ -2,7 +2,8 @@ use crate::classpath::classdir::ClasseDirParseObj;
 use std::path::Path;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
-
+use crate::classpath::class_reader::ClassFileReader;
+#[derive(Debug)]
 pub struct CommonClassdir {
     path:String,
 }
@@ -15,12 +16,12 @@ impl ClasseDirParseObj for CommonClassdir {
         }
     }
 
-    fn read_class(&self, class_name: &str) -> Vec<u8> {
+    fn read_class(&self, class_name: &str) -> Option<ClassFileReader> {
         //拼接 目录
         let my_path = Path::new(self.path.as_str()).join(class_name);
         if !my_path.exists(){
             println!("File not exists.");
-            return Vec::new();
+            return None;
         }
         //打开文件
         let f = File::open(my_path).expect( "File open error!");
@@ -28,8 +29,11 @@ impl ClasseDirParseObj for CommonClassdir {
         let mut reader = BufReader::new(f);
         //将 buffer 中内容 [u8] Clone 并返回 可变数组
         let  buffer:Vec::<u8> = reader.fill_buf().unwrap().to_vec();
-        //返回读取到的文件
-        return buffer;
+        return Some(ClassFileReader {
+            classparseobj: Box::new(CommonClassdir::new(self.path.as_str())),
+            classreader: buffer,
+        });
+
     }
 
     //返回path路径

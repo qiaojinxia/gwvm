@@ -4,4 +4,6 @@ pub mod zip_classdir;
 pub mod  wildcard_classdir;
 pub mod  multiple_classdir;
 pub mod cp;
-
+pub mod class_reader;
+pub mod classfile;
+pub mod classfile_access;
