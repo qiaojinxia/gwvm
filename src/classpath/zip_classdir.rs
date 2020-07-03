@@ -1,26 +1,26 @@
+use crate::classpath::class_reader::ClassFileReader;
 use crate::classpath::classdir::ClasseDirParseObj;
 use std::fs;
-use std::path::Path;
 use std::io::{BufReader, Read};
-use crate::classpath::class_reader::ClassFileReader;
+use std::path::Path;
 
 const CLASS_SUFFIX: &'static str = ".class";
 const CLASS_CAPSUFFIX: &'static str = ".CLASS";
 pub struct ZipClassdir {
-    path:String,
+    path: String,
 }
 impl ClasseDirParseObj for ZipClassdir {
     //生成 一个类目录对象 包含一个目录
-    fn new(mypath:&str) -> Self {
+    fn new(mypath: &str) -> Self {
         ZipClassdir {
             path: mypath.parse().unwrap(),
         }
     }
 
-    fn read_class(&self, class_name: &str) -> Option<ClassFileReader>{
+    fn read_class(&self, class_name: &str) -> Option<ClassFileReader> {
         //拼接 目录
         let my_path = Path::new(self.path.as_str());
-        if !my_path.exists(){
+        if !my_path.exists() {
             println!("File not exists.");
             return None;
         }
@@ -39,14 +39,26 @@ impl ClasseDirParseObj for ZipClassdir {
             //     }
             // }
 
-            if outpath.as_path().display().to_string().replace(CLASS_SUFFIX, "").replace(CLASS_CAPSUFFIX, "") == class_name.to_string() {
-                let mut arr:Vec<u8>  = Vec::with_capacity(file.size() as usize);
+            if outpath
+                .as_path()
+                .display()
+                .to_string()
+                .replace(CLASS_SUFFIX, "")
+                .replace(CLASS_CAPSUFFIX, "")
+                == class_name.to_string()
+            {
+                let mut arr: Vec<u8> = Vec::with_capacity(file.size() as usize);
                 let size = file.read_to_end(arr.as_mut()).unwrap();
 
-                println!("Entry {} is a file with name \"{}\" ({} bytes)", i, outpath.as_path().display(), size);
+                println!(
+                    "Entry {} is a file with name \"{}\" ({} bytes)",
+                    i,
+                    outpath.as_path().display(),
+                    size
+                );
                 return Some(ClassFileReader {
                     classparseobj: Box::new(ZipClassdir::new(self.path.as_str())),
-                    classreader:arr,
+                    classreader: arr,
                 });
             }
 
@@ -58,7 +70,6 @@ impl ClasseDirParseObj for ZipClassdir {
         }
 
         return None;
-
     }
 
     fn get_path(&self) -> String {

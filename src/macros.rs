@@ -18,3 +18,20 @@ macro_rules! when_debug {
         }
     };
 }
+#[macro_export]
+macro_rules! try_eq {
+    ($expr:expr) => {{
+        if !$expr {
+            return None;
+        }
+    }};
+}
+//判断是否相等 宏
+#[macro_export]
+macro_rules! try_eq {
+    ($expr:expr) => {{
+        if !$expr {
+            return None;
+        }
+    }};
+}

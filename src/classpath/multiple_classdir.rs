@@ -1,27 +1,29 @@
-use crate::classpath::classdir::ClasseDirParseObj;
-use crate::classpath::classdir;
 use crate::classpath::class_reader::ClassFileReader;
+use crate::classpath::classdir;
+use crate::classpath::classdir::ClasseDirParseObj;
 
 pub struct MultipleClassdir {
-    allpath:Vec<Box<dyn ClasseDirParseObj>>,
+    allpath: Vec<Box<dyn ClasseDirParseObj>>,
 }
-const SUFFIX:[char;2]  = [':',','];
+const SUFFIX: [char; 2] = [':', ','];
 impl ClasseDirParseObj for MultipleClassdir {
-    fn new(path: &str) -> Self where Self: Sized {
-        let mut paths:Vec<Box<dyn ClasseDirParseObj>> = Vec::new();
+    fn new(path: &str) -> Self
+    where
+        Self: Sized,
+    {
+        let mut paths: Vec<Box<dyn ClasseDirParseObj>> = Vec::new();
         //linux mac 平台下 以 : 分割 多个目录
         if path.contains(SUFFIX[0]) {
-            for singlepath in path.split(SUFFIX[0]){
+            for singlepath in path.split(SUFFIX[0]) {
                 paths.push(classdir::new_class_dir(singlepath))
             }
-
-        }else if path.contains(SUFFIX[1]){ //windows 平台下 以 /分割 多个目录
-            for singlepath in path.split(SUFFIX[1]){
+        } else if path.contains(SUFFIX[1]) {
+            //windows 平台下 以 /分割 多个目录
+            for singlepath in path.split(SUFFIX[1]) {
                 paths.push(classdir::new_class_dir(singlepath))
             }
-
         }
-       return  MultipleClassdir {allpath:paths}
+        return MultipleClassdir { allpath: paths };
     }
 
     fn read_class(&self, class_name: &str) -> Option<ClassFileReader> {
@@ -29,7 +31,7 @@ impl ClasseDirParseObj for MultipleClassdir {
             let tmp = multipypath.read_class(class_name);
             let res = match tmp {
                 Some(val) => Some(val),
-                None => None
+                None => None,
             };
             return res;
         }
