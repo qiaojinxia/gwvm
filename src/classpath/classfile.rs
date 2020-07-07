@@ -1,5 +1,5 @@
 use crate::classpath::classfile_access::parse_type;
-use crate::classpath::classfile_attribute::AttributeInfo;
+use crate::classpath::classfile_attribute::{Attribute, AttributeInfo};
 
 //class 读取后的完整结构
 #[derive(Debug, Clone)]
@@ -135,7 +135,12 @@ impl ClassFile {
                 "method name : {} access_flags : {:?}  descriptor_info: {}",
                 name, access_flags, descriptor_info
             );
+
+            for (i, v) in methodinfo.attribute_info.iter().enumerate() {
+                println!("{}", v.info);
+            }
         }
+
         println!("");
     }
 }

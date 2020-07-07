@@ -1,3 +1,11 @@
+use crate::classpath::classfile::Constant;
+
+
+use core::fmt;
+use std::fmt::{Error, Formatter};
+use crate::classpath::vmcode::Inst;
+use crate::classpath::vmcode::Inst::{get_inst_size, get_inst_desc};
+
 /**
 属性表
 
@@ -73,6 +81,31 @@ pub enum Attribute {
 }
 
 #[derive(Debug, Clone)]
+pub enum Value {
+    const_value_index(U16ConstantIndex),
+    enum_const_value {
+        type_name_index: U16ConstantIndex,
+        const_name_index: U16ConstantIndex,
+    },
+    class_info_index(U16ConstantIndex),
+    annotation_value(Annotation),
+    array_value {
+        num_values: u16,
+        element_value: Vec<ElementValue>,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub struct U16ConstantIndex {
+    index: u16,
+}
+impl U16ConstantIndex {
+    pub fn new(index: u16) -> Self {
+        U16ConstantIndex { index }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct CodeAttribute {
     pub max_stack: u16,     // 给出了当前放大的操作数占在方法执行的任何时间点的最大深度
     pub max_locals: u16, // 给出了分配在当前方法引用的局部变量表中的局部变量个数,其中也包括调试此方法时用于传递参数的局部变量。
@@ -82,6 +115,240 @@ pub struct CodeAttribute {
     pub exception_table: Vec<Exception>, // 每个Exception 都是 code[] 数组中的一个异常处理器.
     pub attributes_count: u16, // 给出了Code属性中attributes[] 成员的个数
     pub attributes_info: Vec<AttributeInfo>, // 一个AttributeInfo 的结构体,可以放入其他类型的属性表
+}
+
+impl fmt::Display for Attribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut res = String::new();
+        match self {
+            Attribute::Code(CodeAttribute) => print!("{}", CodeAttribute),
+            _ => print!("{:?}", self),
+        }
+        write!(f, "")
+    }
+}
+
+impl fmt::Display for CodeAttribute {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        let mut output = String::new();
+        let code = unsafe { &*self.code };
+        let mut pc = 0;
+        // output.push(format!("max_stack: {} max_locals: {} code_length: {} \n ", self.max_stack, self.max_locals, self.code_length).parse().unwrap());
+        while pc < code.len() {
+            print!("{number:>0width$} ", number=pc, width=4);
+            match code[pc] {
+                Inst::nop => print!("nop"),
+                Inst::aconst_null => print!("aconst_null"),
+                Inst::iconst_m1 => print!("iconst_m1"),
+                Inst::iconst_0 => print!("iconst_0"),
+                Inst::iconst_1 => print!("iconst_1"),
+                Inst::iconst_2 => print!("iconst_2"),
+                Inst::iconst_3 => print!("iconst_3"),
+                Inst::iconst_4 => print!("iconst_4"),
+                Inst::iconst_5 => print!("iconst_5"),
+                Inst::lconst_0 => print!("lconst_0"),
+                Inst::lconst_1 => print!("lconst_1"),
+                Inst::fconst_0 => print!("fconst_0"),
+                Inst::fconst_1 => print!("fconst_1"),
+                Inst::fconst_2 => print!("fconst_2"),
+                Inst::dconst_0 => print!("dconst_0"),
+                Inst::dconst_1 => print!("dconst_1"),
+                Inst::bipush => print!("bipush"),
+                Inst::sipush => print!("sipush"),
+                Inst::ldc => print!("ldc"),
+                Inst::ldc_w => print!("ldc_w"),
+                Inst::ldc2_w => print!("ldc2_w"),
+                Inst::iload => print!("iload"),
+                Inst::lload => print!("lload"),
+                Inst::fload => print!("fload"),
+                Inst::dload => print!("dload"),
+                Inst::aload => print!("aload"),
+                Inst::iload_0 => print!("iload_0"),
+                Inst::iload_1 => print!("iload_1"),
+                Inst::iload_2 => print!("iload_2"),
+                Inst::iload_3 => print!("iload_3"),
+                Inst::lload_0 => print!("lload_0"),
+                Inst::lload_1 => print!("lload_1"),
+                Inst::lload_2 => print!("lload_2"),
+                Inst::lload_3 => print!("lload_3"),
+                Inst::fload_0 => print!("fload_0"),
+                Inst::fload_1 => print!("fload_1"),
+                Inst::fload_2 => print!("fload_2"),
+                Inst::fload_3 => print!("fload_3"),
+                Inst::dload_0 => print!("dload_0"),
+                Inst::dload_1 => print!("dload_1"),
+                Inst::dload_2 => print!("dload_2"),
+                Inst::dload_3 => print!("dload_3"),
+                Inst::aload_0 => print!("aload_0"),
+                Inst::aload_1 => print!("aload_1"),
+                Inst::aload_2 => print!("aload_2"),
+                Inst::aload_3 => print!("aload_3"),
+                Inst::iaload => print!("iaload"),
+                Inst::laload => print!("laload"),
+                Inst::faload => print!("faload"),
+                Inst::daload => print!("daload"),
+                Inst::aaload => print!("aaload"),
+                Inst::baload => print!("baload"),
+                Inst::caload => print!("caload"),
+                Inst::saload => print!("saload"),
+                Inst::istore => print!("istore"),
+                Inst::lstore => print!("lstore"),
+                Inst::fstore => print!("fstore"),
+                Inst::dstore => print!("dstore"),
+                Inst::astore => print!("astore"),
+                Inst::istore_0 => print!("istore_0"),
+                Inst::istore_1 => print!("istore_1"),
+                Inst::istore_2 => print!("istore_2"),
+                Inst::istore_3 => print!("istore_3"),
+                Inst::lstore_0 => print!("lstore_0"),
+                Inst::lstore_1 => print!("lstore_1"),
+                Inst::lstore_2 => print!("lstore_2"),
+                Inst::lstore_3 => print!("lstore_3"),
+                Inst::fstore_0 => print!("fstore_0"),
+                Inst::fstore_1 => print!("fstore_1"),
+                Inst::fstore_2 => print!("fstore_2"),
+                Inst::fstore_3 => print!("fstore_3"),
+                Inst::dstore_0 => print!("dstore_0"),
+                Inst::dstore_1 => print!("dstore_1"),
+                Inst::dstore_2 => print!("dstore_2"),
+                Inst::dstore_3 => print!("dstore_3"),
+                Inst::astore_0 => print!("astore_0"),
+                Inst::astore_1 => print!("astore_1"),
+                Inst::astore_2 => print!("astore_2"),
+                Inst::astore_3 => print!("astore_3"),
+                Inst::iastore => print!("iastore"),
+                Inst::lastore => print!("lastore"),
+                Inst::fastore => print!("fastore"),
+                Inst::dastore => print!("dastore"),
+                Inst::aastore => print!("aastore"),
+                Inst::bastore => print!("bastore"),
+                Inst::castore => print!("castore"),
+                Inst::sastore => print!("sastore"),
+                Inst::pop => print!("pop"),
+                Inst::pop2 => print!("pop2"),
+                Inst::dup => print!("dup"),
+                Inst::dup_x1 => print!("dup_x1"),
+                Inst::dup_x2 => print!("dup_x2"),
+                Inst::dup2 => print!("dup2"),
+                Inst::dup2_x1 => print!("dup2_x1"),
+                Inst::dup2_x2 => print!("dup2_x2"),
+                Inst::swap => print!("swap"),
+                Inst::iadd => print!("iadd"),
+                Inst::ladd => print!("ladd"),
+                Inst::fadd => print!("fadd"),
+                Inst::dadd => print!("dadd"),
+                Inst::isub => print!("isub"),
+                Inst::lsub => print!("lsub"),
+                Inst::fsub => print!("fsub"),
+                Inst::dsub => print!("dsub"),
+                Inst::imul => print!("imul"),
+                Inst::lmul => print!("lmul"),
+                Inst::fmul => print!("fmul"),
+                Inst::dmul => print!("dmul"),
+                Inst::idiv => print!("idiv"),
+                Inst::ldiv => print!("ldiv"),
+                Inst::fdiv => print!("fdiv"),
+                Inst::ddiv => print!("ddiv"),
+                Inst::irem => print!("irem"),
+                Inst::lrem => print!("lrem"),
+                Inst::frem => print!("frem"),
+                Inst::drem => print!("drem"),
+                Inst::ineg => print!("ineg"),
+                Inst::lneg => print!("lneg"),
+                Inst::fneg => print!("fneg"),
+                Inst::dneg => print!("dneg"),
+                Inst::ishl => print!("ishl"),
+                Inst::lshl => print!("lshl"),
+                Inst::ishr => print!("ishr"),
+                Inst::lshr => print!("lshr"),
+                Inst::iushr => print!("iushr"),
+                Inst::lushr => print!("lushr"),
+                Inst::iand => print!("iand"),
+                Inst::land => print!("land"),
+                Inst::ior => print!("ior"),
+                Inst::lor => print!("lor"),
+                Inst::ixor => print!("ixor"),
+                Inst::lxor => print!("lxor"),
+                Inst::iinc => print!("iinc"),
+                Inst::i2l => print!("i2l"),
+                Inst::i2f => print!("i2f"),
+                Inst::i2d => print!("i2d"),
+                Inst::l2i => print!("l2i"),
+                Inst::l2f => print!("l2f"),
+                Inst::l2d => print!("l2d"),
+                Inst::f2i => print!("f2i"),
+                Inst::f2l => print!("f2l"),
+                Inst::f2d => print!("f2d"),
+                Inst::d2i => print!("d2i"),
+                Inst::d2l => print!("d2l"),
+                Inst::d2f => print!("d2f"),
+                Inst::i2b => print!("i2b"),
+                Inst::i2c => print!("i2c"),
+                Inst::i2s => print!("i2s"),
+                Inst::lcmp => print!("lcmp"),
+                Inst::fcmpl => print!("fcmpl"),
+                Inst::fcmpg => print!("fcmpg"),
+                Inst::dcmpl => print!("dcmpl"),
+                Inst::dcmpg => print!("dcmpg"),
+                Inst::ifeq => print!("ifeq"),
+                Inst::ifne => print!("ifne"),
+                Inst::iflt => print!("iflt"),
+                Inst::ifge => print!("ifge"),
+                Inst::ifgt => print!("ifgt"),
+                Inst::ifle => print!("ifle"),
+                Inst::if_icmpeq => print!("if_icmpeq"),
+                Inst::if_icmpne => print!("if_icmpne"),
+                Inst::if_icmplt => print!("if_icmplt"),
+                Inst::if_icmpge => print!("if_icmpge"),
+                Inst::if_icmpgt => print!("if_icmpgt"),
+                Inst::if_icmple => print!("if_icmple"),
+                Inst::if_acmpeq => print!("if_acmpeq"),
+                Inst::if_acmpne => print!("if_acmpne"),
+                Inst::_goto => print!("goto"),
+                Inst::jsr => print!("jsr"),
+                Inst::ret => print!("ret"),
+                Inst::tableswitch => print!("tableswitch"),
+                Inst::lookupswitch => print!("lookupswitch"),
+                Inst::ireturn => print!("ireturn"),
+                Inst::lreturn => print!("lreturn"),
+                Inst::freturn => print!("freturn"),
+                Inst::dreturn => print!("dreturn"),
+                Inst::areturn => print!("areturn"),
+                Inst::_return => print!("return"),
+                Inst::getstatic => print!("getstatic"),
+                Inst::putstatic => print!("putstatic"),
+                Inst::getfield => print!("getfield"),
+                Inst::putfield => print!("putfield"),
+                Inst::invokevirtual => print!("invokevirtual"),
+                Inst::invokespecial => print!("invokespecial"),
+                Inst::invokestatic => print!("invokestatic"),
+                Inst::invokeinterface => print!("invokeinterface"),
+                Inst::invokedynamic => print!("invokedynamic"),
+                Inst::new => print!("new"),
+                Inst::newarray => print!("newarray"),
+                Inst::anewarray => print!("anewarray"),
+                Inst::arraylength => print!("arraylength"),
+                Inst::athrow => print!("athrow"),
+                Inst::checkcast => print!("checkcast"),
+                Inst::_instanceof => print!("instanceof"),
+                Inst::monitorenter => print!("monitorenter"),
+                Inst::monitorexit => print!("monitorexit"),
+                Inst::wide => print!("wide"),
+                Inst::multianewarray => print!("multianewarray"),
+                Inst::ifnull => print!("ifnull"),
+                Inst::ifnonnull => print!("ifnonnull"),
+                Inst::goto_w => print!("goto_w"),
+                Inst::jsr_w => print!("jsr_w"),
+                Inst::breakpoint => print!("breakpoint"),
+                Inst::impdep1 => print!("impdep1"),
+                Inst::impdep2 => print!("impdep2"),
+                _ => print!("{}", code[pc]),
+            }
+            print!(" {} \n",get_inst_desc(code[pc]));
+            pc += get_inst_size(code[pc]);
+        }
+        write!(f, "{}", output)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -106,12 +373,23 @@ pub struct Exception {
     pub catch_type: u16,
 }
 
+impl fmt::Display for Exception {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        unimplemented!()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct LineNumber {
     /**表示字节码文件中的字节码行号*/
     pub start_pc: u16,
     /**表示Java代码中的行号*/
     pub line_number: u16,
+}
+impl fmt::Display for LineNumber {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        unimplemented!()
+    }
 }
 
 /**
@@ -129,6 +407,11 @@ pub struct LocalVariableTable {
     /** index 为此局部变量在当前栈帧的局部表中的索引 */
     pub index: u16,
 }
+impl fmt::Display for LocalVariableTable {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        unimplemented!()
+    }
+}
 
 /**
 内部类表
@@ -144,6 +427,11 @@ pub struct InnerClassesInfo {
     /** 内部类的访问标志,类似于access_flags  */
     pub inner_class_access_flags: u16,
 }
+impl fmt::Display for InnerClassesInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        unimplemented!()
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct StackMapFrame {
@@ -151,6 +439,11 @@ pub struct StackMapFrame {
     pub body: StackMapFrameBody,
 }
 
+impl fmt::Display for StackMapFrame {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        unimplemented!()
+    }
+}
 #[derive(Debug, Clone)]
 pub enum StackMapFrameBody {
     //frame_type = SAME ;/ 0-63 / 与上一个比较位置的局部变量表相同，且操作数栈为空，这个值也是隐含的 offset_delta
@@ -185,6 +478,11 @@ pub enum StackMapFrameBody {
         number_of_stack_items: u16,
         stack: Vec<VerificationTypeInfo>,
     },
+}
+impl fmt::Display for StackMapFrameBody {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        unimplemented!()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -224,7 +522,8 @@ pub struct ElementValuePair {
 #[derive(Clone, Debug)]
 pub struct ElementValue {
     //对应  calue类型
-    tag: u8,
+    pub tag: u8,
+    pub value: Value,
 }
 #[derive(Clone, Debug)]
 pub struct BoostrapMethods {

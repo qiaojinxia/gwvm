@@ -59,6 +59,7 @@ impl ClasseDirParseObj for ZipClassdir {
                 return Some(ClassFileReader {
                     classparseobj: Box::new(ZipClassdir::new(self.path.as_str())),
                     classreader: arr,
+                    index: 0,
                 });
             }
 

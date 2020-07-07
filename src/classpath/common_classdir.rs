@@ -32,6 +32,7 @@ impl ClasseDirParseObj for CommonClassdir {
         return Some(ClassFileReader {
             classparseobj: Box::new(CommonClassdir::new(self.path.as_str())),
             classreader: buffer,
+            index: 0,
         });
     }
 

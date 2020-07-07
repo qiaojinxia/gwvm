@@ -2,17 +2,20 @@ use crate::classpath::classdir::ClasseDirParseObj;
 use crate::classpath::classfile::{
     u8_to_constant_type, ClassFile, Constant, ConstantType, FieldInfo, MethodInfo,
 };
+
 use crate::classpath::classfile_attribute::Attribute::{Exceptions, LocalVaribleTable};
 use crate::classpath::classfile_attribute::{
     Annotation, Attribute, AttributeInfo, BoostrapMethods, CodeAttribute, ElementValue,
     ElementValuePair, Exception, InnerClassesInfo, LineNumber, LocalVariableTable, Parameters,
-    StackMapFrame, StackMapFrameBody, VerificationTypeInfo,
+    StackMapFrame, StackMapFrameBody, U16ConstantIndex, Value, VerificationTypeInfo,
 };
+use std::fs::read;
 use std::mem::transmute;
 
 pub struct ClassFileReader {
     pub classparseobj: Box<dyn ClasseDirParseObj>,
     pub classreader: Vec<u8>,
+    pub index: usize,
 }
 
 impl ClassFileReader {
@@ -265,19 +268,11 @@ impl ClassFileReader {
 impl ClassFileReader {
     //读取 32 bit 4字节
     fn read_u32(&mut self) -> Option<u32> {
-        let mut buf = [0u8; 4];
-        if self.classreader.len() < 4 {
+        if self.index + 4 > self.classreader.len() {
             return None;
         }
-        for (i, v) in self.classreader.iter().enumerate() {
-            if i > 3 {
-                continue;
-            };
-            buf[i] = *v;
-        }
-        for _ in 0..4 {
-            self.classreader.remove(0);
-        }
+        let mut buf = &self.classreader[self.index..self.index + 4];
+        self.index += 4;
         Some(
             ((buf[0] as u32) << 24)
                 + ((buf[1] as u32) << 16)
@@ -288,46 +283,24 @@ impl ClassFileReader {
 
     //读取 16 bit 2字节
     fn read_u16(&mut self) -> Option<u16> {
-        let mut buf = [0u8; 2];
-        if self.classreader.len() < 2 {
+        if self.index + 2 > self.classreader.len() {
             return None;
         }
-        for (i, v) in self.classreader.iter().enumerate() {
-            if i > 1 {
-                continue;
-            };
-            buf[i] = *v;
-        }
-        for _ in 0..2 {
-            self.classreader.remove(0);
-        }
+        let buf = &self.classreader[self.index..self.index + 2];
+        self.index += 2;
         Some(((buf[0] as u16) << 8) + buf[1] as u16)
     }
 
     //跳过字节
     fn skip_bytes(&mut self, num: usize) {
-        for _ in 0..num {
-            self.classreader.remove(0);
-        }
+        self.index += num;
     }
 
     //读取 8 bit 1字节
     fn read_u8(&mut self) -> Option<u8> {
-        let mut buf = [0u8; 1];
-        if self.classreader.len() < 1 {
-            return None;
-        }
-        for (i, v) in self.classreader.iter().enumerate() {
-            if i > 0 {
-                continue;
-            };
-
-            buf[i] = *v;
-        }
-        for _ in 0..1 {
-            self.classreader.remove(0);
-        }
-        Some(buf[0])
+        let mut buf = &self.classreader[self.index];
+        self.index += 1;
+        Some(*buf)
     }
 }
 
@@ -347,7 +320,7 @@ impl ClassFileReader {
             "Signature" => self.read_signature_attribute()?,
             "Exceptions" => self.read_exceptions_attribute()?,
             "Deprecated" => self.read_deprecated_attribute()?,
-            // "RuntimeVisibleAnnotations" => self.read_runtime_visible_annotations_attribute()?,
+            "RuntimeVisibleAnnotations" => self.read_runtime_visible_annotations_attribute()?,
             "InnerClasses" => self.read_inner_classes_attribute()?,
             "ConstantValue" => self.read_constant_value_attribute()?,
             "LocalVariableTable" => self.read_local_variable_attribute()?,
@@ -371,8 +344,7 @@ impl ClassFileReader {
         let code_length = self.read_u32()?;
         let mut code: Vec<u8> = vec![];
         for _ in 0..code_length {
-            let tmpcode = self.read_u8()?;
-            code.push(tmpcode);
+            code.push(self.read_u8()?);
         }
         let exception_table_length = self.read_u16()?;
         //异常表个数
@@ -651,13 +623,47 @@ impl ClassFileReader {
     fn read_element_value_pair(&mut self) -> Option<ElementValuePair> {
         let element_name_index = self.read_u16()?;
         let value = self.read_element_value()?;
+
         Some(ElementValuePair {
             element_name_index,
             value,
         })
     }
     fn read_element_value(&mut self) -> Option<ElementValue> {
-        unimplemented!()
+        let ch = self.read_u8()? as char;
+        let value = match ch {
+            'B' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'C' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'D' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'F' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'I' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'J' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'S' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'Z' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            's' => Value::const_value_index(U16ConstantIndex::new(self.read_u16()?)),
+            'e' => Value::enum_const_value {
+                type_name_index: U16ConstantIndex::new(self.read_u16()?),
+                const_name_index: U16ConstantIndex::new(self.read_u16()?),
+            },
+            'c' => Value::class_info_index(U16ConstantIndex::new(self.read_u16()?)),
+            '@' => Value::annotation_value(self.read_annotation()?),
+            '[' => {
+                let mut element_value = vec![];
+                let num_values = self.read_u16()?;
+                for _ in 0..num_values {
+                    element_value.push(self.read_element_value()?);
+                }
+                Value::array_value {
+                    num_values,
+                    element_value,
+                }
+            }
+            _ => unreachable!(),
+        };
+        Some(ElementValue {
+            tag: ch as u8,
+            value,
+        })
     }
 
     fn read_constant_value_attribute(&mut self) -> Option<Attribute> {
