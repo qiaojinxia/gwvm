@@ -174,7 +174,7 @@ pub mod Inst {
     pub const if_icmple: u8 = 164;
     pub const if_acmpeq: u8 = 165;
     pub const if_acmpne: u8 = 166;
-    pub const _goto: u8 = 167;
+    pub const goto: u8 = 167;
     pub const jsr: u8 = 168;
     pub const ret: u8 = 169;
     pub const tableswitch: u8 = 170;
@@ -200,7 +200,7 @@ pub mod Inst {
     pub const arraylength: u8 = 190;
     pub const athrow: u8 = 191;
     pub const checkcast: u8 = 192;
-    pub const _instanceof: u8 = 193;
+    pub const instanceof: u8 = 193;
     pub const monitorenter: u8 = 194;
     pub const monitorexit: u8 = 195;
     pub const wide: u8 = 196;
@@ -444,8 +444,8 @@ pub mod Inst {
             multianewarray => 4,
             sipush | ldc_w | ldc2_w | iinc | ifeq | ifne | iflt | ifge | ifgt | ifle | if_icmpeq
             | if_icmpne | if_icmplt | if_icmpge | if_icmpgt | if_icmple | if_acmpeq | if_acmpne
-            | _goto | jsr | getstatic | putstatic | getfield | putfield | invokevirtual
-            | invokespecial | invokestatic | new | anewarray | checkcast | _instanceof | ifnull
+            | goto | jsr | getstatic | putstatic | getfield | putfield | invokevirtual
+            | invokespecial | invokestatic | new | anewarray | checkcast | instanceof | ifnull
             | ifnonnull => 3,
             invokeinterface | invokedynamic | goto_w | jsr_w => 5,
             e => unimplemented!("{}", e),

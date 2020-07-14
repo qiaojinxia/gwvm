@@ -133,9 +133,9 @@ impl fmt::Display for CodeAttribute {
         let mut output = String::new();
         let code = unsafe { &*self.code };
         let mut pc = 0;
-        // output.push(format!("max_stack: {} max_locals: {} code_length: {} \n ", self.max_stack, self.max_locals, self.code_length).parse().unwrap());
+        println!("max_stack: {} max_locals: {} code_length: {} ", self.max_stack, self.max_locals, self.code_length);
         while pc < code.len() {
-            print!("{number:>0width$} ", number=pc, width=4);
+            print!("   {number:>0width$} ", number=pc, width=4);
             match code[pc] {
                 Inst::nop => print!("nop"),
                 Inst::aconst_null => print!("aconst_null"),
@@ -304,7 +304,7 @@ impl fmt::Display for CodeAttribute {
                 Inst::if_icmple => print!("if_icmple"),
                 Inst::if_acmpeq => print!("if_acmpeq"),
                 Inst::if_acmpne => print!("if_acmpne"),
-                Inst::_goto => print!("goto"),
+                Inst::goto => print!("goto"),
                 Inst::jsr => print!("jsr"),
                 Inst::ret => print!("ret"),
                 Inst::tableswitch => print!("tableswitch"),
@@ -330,7 +330,7 @@ impl fmt::Display for CodeAttribute {
                 Inst::arraylength => print!("arraylength"),
                 Inst::athrow => print!("athrow"),
                 Inst::checkcast => print!("checkcast"),
-                Inst::_instanceof => print!("instanceof"),
+                Inst::instanceof => print!("instanceof"),
                 Inst::monitorenter => print!("monitorenter"),
                 Inst::monitorexit => print!("monitorexit"),
                 Inst::wide => print!("wide"),

@@ -18,8 +18,8 @@ pub struct ClassFile {
     pub fields: Vec<FieldInfo>, //字段表信息 存放变量的 名字描述符和 属性
     pub methods_count: u16, //方法数
     pub methods: Vec<MethodInfo>, //存放方法的名 描述符合属性
-                          // pub attributes_count: u16,//属性数
-                          // pub attributes: Vec<AttributeInfo>,//记录属性表
+    pub attributes_count: u16,//属性数
+    pub attributes: Vec<AttributeInfo>,//记录属性表
 }
 
 impl ClassFile {
@@ -39,8 +39,8 @@ impl ClassFile {
             fields: vec![],
             methods_count: 0,
             methods: vec![],
-            // attributes_count: 0,
-            // attributes: vec![],
+            attributes_count: 0,
+            attributes: vec![],
         }
     }
 
@@ -139,6 +139,9 @@ impl ClassFile {
             for (i, v) in methodinfo.attribute_info.iter().enumerate() {
                 println!("{}", v.info);
             }
+        }
+        for i in 0..self.attributes_count as usize{
+            println!("{:?}",self.attributes[i]);
         }
 
         println!("");

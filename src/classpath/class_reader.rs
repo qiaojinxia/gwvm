@@ -66,14 +66,14 @@ impl ClassFileReader {
             interfaces.push(tmp);
         }
 
-        //字段数
+        //读取段属性
         let fields_count = self.read_u16()?;
         //解析字段 的属性,字段可能包含属性表
         let mut fields = Vec::new();
         for _ in 0..fields_count {
             fields.push(self.read_field_info(&constant_pool)?);
         }
-
+        //读取方法表
         let methods_count = self.read_u16()?;
         let mut methods = vec![];
         for _ in 0..methods_count {
@@ -96,6 +96,12 @@ impl ClassFileReader {
             methods.push(method_info);
         }
 
+        //读取属性表
+        let attributes_count =self.read_u16()?;
+        let mut attributes =vec![];
+        for _ in 0..attributes_count{
+            attributes.push(self.read_attribute_info(constant_pool.as_ref())?);
+        }
         Some(ClassFile {
             magic,
             minor_version,
@@ -111,6 +117,8 @@ impl ClassFileReader {
             fields,
             methods_count,
             methods,
+            attributes_count,
+            attributes,
         })
     }
 

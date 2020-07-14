@@ -2,10 +2,11 @@
 #![feature(str_strip)]
 
 mod classpath;
-
+mod vm;
 extern crate clap;
 extern crate hex;
 use crate::classpath::cp::ClassPath;
+
 use clap::{App, Arg};
 use std::env;
 
