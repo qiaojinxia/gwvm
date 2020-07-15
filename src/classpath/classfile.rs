@@ -4,13 +4,13 @@ use crate::classpath::classfile_attribute::{Attribute, AttributeInfo};
 //class 读取后的完整结构
 #[derive(Debug, Clone)]
 pub struct ClassFile {
-    pub magic: u32,                   //class文件的魔数
-    pub minor_version: u16,           //编译此Class文件JDK的次版本号
-    pub major_version: u16,           //编译此Class文件JDK的主版本号
-    pub constant_pool_count: u16,     //常量池数量 从 1开始 0保留
-    pub constant_pool: Vec<Constant>, //常量池 包含14中结构的数据
-    pub access_flags: u16,            //访问标志 记录 接口类 方法的 访问标志
-    pub this_class: u16,              //当前类名的索引 指向常量池一个utf-8字符串
+    pub magic: u32,                     //class文件的魔数
+    pub minor_version: u16,             //编译此Class文件JDK的次版本号
+    pub major_version: u16,             //编译此Class文件JDK的主版本号
+    pub constant_pool_count: u16,       //常量池数量 从 1开始 0保留
+    pub constant_pool: Vec<Constant>,   //常量池 包含14中结构的数据
+    pub access_flags: u16,              //访问标志 记录 接口类 方法的 访问标志
+    pub this_class: u16,                //当前类名的索引 指向常量池一个utf-8字符串
     pub super_class: u16, //父类的索引 除了 java.lang.Object 每个类都应该有对应的父类,指向常量池一个utf-8字符串
     pub interfaces_count: u16, //接口的个数
     pub interfaces: Vec<Constant>, //常量池 utf-8结构 存放 继承接口的类名 从左到右
@@ -18,8 +18,8 @@ pub struct ClassFile {
     pub fields: Vec<FieldInfo>, //字段表信息 存放变量的 名字描述符和 属性
     pub methods_count: u16, //方法数
     pub methods: Vec<MethodInfo>, //存放方法的名 描述符合属性
-    pub attributes_count: u16,//属性数
-    pub attributes: Vec<AttributeInfo>,//记录属性表
+    pub attributes_count: u16, //属性数
+    pub attributes: Vec<AttributeInfo>, //记录属性表
 }
 
 impl ClassFile {
@@ -140,8 +140,8 @@ impl ClassFile {
                 println!("{}", v.info);
             }
         }
-        for i in 0..self.attributes_count as usize{
-            println!("{:?}",self.attributes[i]);
+        for i in 0..self.attributes_count as usize {
+            println!("{:?}", self.attributes[i]);
         }
 
         println!("");

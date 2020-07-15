@@ -97,9 +97,9 @@ impl ClassFileReader {
         }
 
         //读取属性表
-        let attributes_count =self.read_u16()?;
-        let mut attributes =vec![];
-        for _ in 0..attributes_count{
+        let attributes_count = self.read_u16()?;
+        let mut attributes = vec![];
+        for _ in 0..attributes_count {
             attributes.push(self.read_attribute_info(constant_pool.as_ref())?);
         }
         Some(ClassFile {

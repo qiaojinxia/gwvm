@@ -1,10 +1,9 @@
 use crate::classpath::classfile::Constant;
 
-
+use crate::classpath::vmcode::Inst;
+use crate::classpath::vmcode::Inst::{get_inst_desc, get_inst_size};
 use core::fmt;
 use std::fmt::{Error, Formatter};
-use crate::classpath::vmcode::Inst;
-use crate::classpath::vmcode::Inst::{get_inst_size, get_inst_desc};
 
 /**
 属性表
@@ -133,9 +132,12 @@ impl fmt::Display for CodeAttribute {
         let mut output = String::new();
         let code = unsafe { &*self.code };
         let mut pc = 0;
-        println!("max_stack: {} max_locals: {} code_length: {} ", self.max_stack, self.max_locals, self.code_length);
+        println!(
+            "max_stack: {} max_locals: {} code_length: {} ",
+            self.max_stack, self.max_locals, self.code_length
+        );
         while pc < code.len() {
-            print!("   {number:>0width$} ", number=pc, width=4);
+            print!("   {number:>0width$} ", number = pc, width = 4);
             match code[pc] {
                 Inst::nop => print!("nop"),
                 Inst::aconst_null => print!("aconst_null"),
@@ -344,7 +346,7 @@ impl fmt::Display for CodeAttribute {
                 Inst::impdep2 => print!("impdep2"),
                 _ => print!("{}", code[pc]),
             }
-            print!(" {} \n",get_inst_desc(code[pc]));
+            print!(" {} \n", get_inst_desc(code[pc]));
             pc += get_inst_size(code[pc]);
         }
         write!(f, "{}", output)
